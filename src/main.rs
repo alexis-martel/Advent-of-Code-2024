@@ -1,6 +1,6 @@
 fn main() {
     const INPUT: &str = "[INPUT]";
-    println!("{}", dec_3_2(INPUT));
+    println!("{}", dec_5_2(INPUT));
 }
 
 fn dec_1_1(input: &str) -> i32 {
@@ -127,7 +127,6 @@ fn dec_3_1(input: &str) -> i32 {
     let matches: Vec<_> = re.find_iter(input).map(|m| m.as_str()).collect();
     let mut sum = 0;
     for mul_expression in matches {
-        println!("{}", mul_expression);
         let nums = mul_expression.replace("mul(", "").replace(")", "");
         let split_nums: Vec<&str> = nums.split(",").collect();
         sum += split_nums[0].parse::<i32>().unwrap() * split_nums[1].parse::<i32>().unwrap();
@@ -145,10 +144,6 @@ fn dec_3_2(input: &str) -> i32 {
     }
     let mut sum = 0;
     for i in 0..matches.len() {
-        println!(
-            "{} from {} to {}",
-            matches[i], mul_indices[i].0, mul_indices[i].1
-        );
         let search_slice = &input[0..mul_indices[i].0];
         let last_do_index = search_slice.match_indices("do()").last();
         let last_dont_index = search_slice.match_indices("don't()").last();
@@ -159,6 +154,261 @@ fn dec_3_2(input: &str) -> i32 {
             let nums = matches[i].replace("mul(", "").replace(")", "");
             let split_nums: Vec<&str> = nums.split(",").collect();
             sum += split_nums[0].parse::<i32>().unwrap() * split_nums[1].parse::<i32>().unwrap();
+        }
+    }
+    sum
+}
+
+fn dec_4_1(input: &str) -> i32 {
+    let mut xmas_count = 0;
+    let mut grid: Vec<Vec<char>> = vec![];
+    for line in input.split_whitespace() {
+        let mut new_line: Vec<char> = vec![];
+        for character in line.chars() {
+            new_line.push(character);
+        }
+        grid.push(new_line);
+    }
+    // Find the coordinates of every `X`
+    let mut x_coords: Vec<(i32, i32)> = vec![];
+    for y in 0..grid.len() {
+        for x in 0..grid[0].len() {
+            if grid[y][x] == 'X' {
+                x_coords.push((x as i32, y as i32));
+            }
+        }
+    }
+    // Check for XMAS in 8 directions
+    for coord in x_coords {
+        let x = coord.0 as usize;
+        let y = coord.1 as usize;
+        // Straight
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid.get(y.wrapping_sub(1)).and_then(|row| row.get(x)) == Some(&'M')
+            && grid.get(y.wrapping_sub(2)).and_then(|row| row.get(x)) == Some(&'A')
+            && grid.get(y.wrapping_sub(3)).and_then(|row| row.get(x)) == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid.get(y.wrapping_add(1)).and_then(|row| row.get(x)) == Some(&'M')
+            && grid.get(y.wrapping_add(2)).and_then(|row| row.get(x)) == Some(&'A')
+            && grid.get(y.wrapping_add(3)).and_then(|row| row.get(x)) == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_sub(1))) == Some(&'M')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_sub(2))) == Some(&'A')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_sub(3))) == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_add(1))) == Some(&'M')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_add(2))) == Some(&'A')
+            && grid.get(y).and_then(|row| row.get(x.wrapping_add(3))) == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        // Diagonal
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid
+                .get(y.wrapping_sub(1))
+                .and_then(|row| row.get(x.wrapping_add(1)))
+                == Some(&'M')
+            && grid
+                .get(y.wrapping_sub(2))
+                .and_then(|row| row.get(x.wrapping_add(2)))
+                == Some(&'A')
+            && grid
+                .get(y.wrapping_sub(3))
+                .and_then(|row| row.get(x.wrapping_add(3)))
+                == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid
+                .get(y.wrapping_sub(1))
+                .and_then(|row| row.get(x.wrapping_sub(1)))
+                == Some(&'M')
+            && grid
+                .get(y.wrapping_sub(2))
+                .and_then(|row| row.get(x.wrapping_sub(2)))
+                == Some(&'A')
+            && grid
+                .get(y.wrapping_sub(3))
+                .and_then(|row| row.get(x.wrapping_sub(3)))
+                == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid
+                .get(y.wrapping_add(1))
+                .and_then(|row| row.get(x.wrapping_add(1)))
+                == Some(&'M')
+            && grid
+                .get(y.wrapping_add(2))
+                .and_then(|row| row.get(x.wrapping_add(2)))
+                == Some(&'A')
+            && grid
+                .get(y.wrapping_add(3))
+                .and_then(|row| row.get(x.wrapping_add(3)))
+                == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+        if grid.get(y).and_then(|row| row.get(x)) == Some(&'X')
+            && grid
+                .get(y.wrapping_add(1))
+                .and_then(|row| row.get(x.wrapping_sub(1)))
+                == Some(&'M')
+            && grid
+                .get(y.wrapping_add(2))
+                .and_then(|row| row.get(x.wrapping_sub(2)))
+                == Some(&'A')
+            && grid
+                .get(y.wrapping_add(3))
+                .and_then(|row| row.get(x.wrapping_sub(3)))
+                == Some(&'S')
+        {
+            xmas_count += 1;
+        }
+    }
+    xmas_count
+}
+
+fn dec_4_2(input: &str) -> i32 {
+    let mut grid: Vec<Vec<char>> = vec![];
+    for line in input.split_whitespace() {
+        let mut new_line: Vec<char> = vec![];
+        for character in line.chars() {
+            new_line.push(character);
+        }
+        grid.push(new_line);
+    }
+    let mut x_mas_count = 0;
+    // Generate every 3*3 sub-matrices possible
+    for y in 0..grid.len() - 2 {
+        for x in 0..grid.len() - 2 {
+            let sub_matrix = [
+                [grid[y][x], grid[y][x + 1], grid[y][x + 2]],
+                [grid[y + 1][x], grid[y + 1][x + 1], grid[y + 1][x + 2]],
+                [grid[y + 2][x], grid[y + 2][x + 1], grid[y + 2][x + 2]],
+            ];
+            let c1 = (sub_matrix[0][0] == 'M'
+                && sub_matrix[1][1] == 'A'
+                && sub_matrix[2][2] == 'S')
+                || (sub_matrix[0][0] == 'S' && sub_matrix[1][1] == 'A' && sub_matrix[2][2] == 'M');
+            let c2 = (sub_matrix[0][2] == 'M'
+                && sub_matrix[1][1] == 'A'
+                && sub_matrix[2][0] == 'S')
+                || (sub_matrix[0][2] == 'S' && sub_matrix[1][1] == 'A' && sub_matrix[2][0] == 'M');
+            if c1 && c2 {
+                x_mas_count += 1;
+            }
+        }
+    }
+    x_mas_count
+}
+
+fn dec_5_1(input: &str) -> i32 {
+    let mut sum = 0;
+    // Process input into vectors
+    let split_input: Vec<&str> = input.split("\n\n").collect();
+    let mut rules: Vec<(i32, i32)> = vec![];
+    for line in split_input[0].split_whitespace() {
+        let split_line: Vec<&str> = line.split("|").collect();
+        rules.push((
+            split_line[0].parse().unwrap(),
+            split_line[1].parse().unwrap(),
+        ));
+    }
+    let mut updates: Vec<Vec<i32>> = vec![];
+    for line in split_input[1].split_whitespace() {
+        let split_line: Vec<&str> = line.split(",").collect();
+        let mut update: Vec<i32> = vec![];
+        for page_str in split_line {
+            update.push(page_str.parse().unwrap());
+        }
+        updates.push(update);
+    }
+    // Check rule adhesion
+    for update in updates {
+        let mut correct = true;
+        let mut applicable_rules: Vec<(i32, i32)> = vec![];
+        for rule in &rules {
+            if update.contains(&rule.0) && update.contains(&rule.1) {
+                applicable_rules.push(rule.to_owned());
+            }
+        }
+        for rule in applicable_rules {
+            let first_page_pos = update.iter().position(|&r| r == rule.0).unwrap();
+            let second_page_pos = update.iter().position(|&r| r == rule.1).unwrap();
+            if first_page_pos > second_page_pos {
+                correct = false;
+            }
+        }
+        if correct {
+            sum += update[(update.len() - 1) / 2];
+        }
+    }
+    sum
+}
+
+fn dec_5_2(input: &str) -> i32 {
+    let mut sum = 0;
+    // Process input into vectors
+    let split_input: Vec<&str> = input.split("\n\n").collect();
+    let mut rules: Vec<(i32, i32)> = vec![];
+    for line in split_input[0].split_whitespace() {
+        let split_line: Vec<&str> = line.split("|").collect();
+        rules.push((
+            split_line[0].parse().unwrap(),
+            split_line[1].parse().unwrap(),
+        ));
+    }
+    let mut updates: Vec<Vec<i32>> = vec![];
+    for line in split_input[1].split_whitespace() {
+        let split_line: Vec<&str> = line.split(",").collect();
+        let mut update: Vec<i32> = vec![];
+        for page_str in split_line {
+            update.push(page_str.parse().unwrap());
+        }
+        updates.push(update);
+    }
+    // Check rule adhesion
+    fn is_correct(update: &[i32], rules: &Vec<(i32, i32)>) -> (bool, usize, usize) {
+        let mut correct = true;
+        let mut applicable_rules: Vec<(i32, i32)> = vec![];
+        for rule in rules {
+            if update.contains(&rule.0) && update.contains(&rule.1) {
+                applicable_rules.push(rule.to_owned());
+            }
+        }
+        for rule in applicable_rules {
+            let first_page_pos = update.iter().position(|&r| r == rule.0).unwrap();
+            let second_page_pos = update.iter().position(|&r| r == rule.1).unwrap();
+            if first_page_pos > second_page_pos {
+                correct = false;
+                return (correct, first_page_pos, second_page_pos);
+            }
+        }
+        (correct, 0, 0)
+    }
+    for update in updates {
+        if !is_correct(&update, &rules).0 {
+            let mut copy = update.clone();
+            // Part 2 code here
+            let mut is_correct_res = is_correct(&copy, &rules);
+            while !is_correct_res.0 {
+                // Shuffle
+                copy.swap(is_correct_res.1, is_correct_res.2);
+                is_correct_res = is_correct(&copy, &rules);
+            }
+            sum += copy[(update.len() - 1) / 2];
         }
     }
     sum
