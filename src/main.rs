@@ -1,6 +1,6 @@
 fn main() {
-    const INPUT: &str = "[Input]";
-    println!("{}", dec_6_2(INPUT));
+    const INPUT: &str = "";
+    println!("{}", dec_7_1(INPUT));
 }
 
 fn dec_1_1(input: &str) -> i32 {
@@ -574,4 +574,94 @@ fn dec_6_2(input: &str) -> i32 {
         i += 1;
     }
     looping_obstacle_locations
+}
+
+fn dec_7_1(input: &str) -> i64 {
+    fn evaluate_expression(expr: &str) -> i64 {
+        let mut result = 0;
+        let mut current_number = 0;
+        let mut current_operator = '+';
+
+        for c in expr.chars() {
+            if c.is_digit(10) {
+                current_number = current_number * 10 + c.to_digit(10).unwrap() as i64;
+            } else if "+-*/".contains(c) {
+                match current_operator {
+                    '+' => result += current_number,
+                    '-' => result -= current_number,
+                    '*' => result *= current_number, // If you want to include multiplication
+                    '/' => result /= current_number, // If you want to include division
+                    _ => {}
+                }
+                current_operator = c;
+                current_number = 0;
+            }
+        }
+        // Apply the last operation
+        match current_operator {
+            '+' => result += current_number,
+            '-' => result -= current_number,
+            '*' => result *= current_number, // If you want to include multiplication
+            '/' => result /= current_number, // If you want to include division
+            _ => {}
+        }
+        result
+    }
+    struct Equation<'a> {
+        result: i64,
+        numbers: Vec<&'a str>,
+    }
+    let mut calibration_result = 0;
+    // Parse input
+    let mut equations: Vec<Equation> = vec![];
+    for line in input.split("\n") {
+        let split_line: Vec<&str> = line.split(": ").collect();
+        let res = split_line[0].parse::<i64>().unwrap();
+        let nums: Vec<&str> = split_line[1].split_whitespace().collect::<Vec<&str>>();
+        equations.push(Equation {
+            result: res,
+            numbers: nums,
+        });
+    }
+    let eq_amount = equations.len();
+    for (count, eq) in equations.into_iter().enumerate() {
+        let mut max_combination_binary_num_str: String = "".to_owned();
+        let mut combinations_bin_num_str: Vec<String> = vec![];
+        for _i in 0..eq.numbers.len() - 1 {
+            max_combination_binary_num_str.push('1');
+        }
+        let max_combination_num =
+            i64::from_str_radix(&max_combination_binary_num_str, 2).unwrap() + 1;
+        for i in 0..max_combination_num {
+            let formatted_binary = format!("{:b}", i);
+            let mut leading_zeros = "".to_owned();
+            for _i in 0..max_combination_binary_num_str.len() - formatted_binary.len() {
+                leading_zeros.push('0');
+            }
+            combinations_bin_num_str.push(leading_zeros + &formatted_binary as &str + "e");
+        }
+        let mut to_evaluate: Vec<String> = vec![];
+        for bin_num_str in combinations_bin_num_str {
+            // Generate combination in `to_evaluate`
+            let mut combination: String = "".to_owned();
+            for i in 0..eq.numbers.len() {
+                combination.push_str(eq.numbers[i]);
+                if bin_num_str.chars().collect::<Vec<char>>()[i] == '0' {
+                    combination.push('*');
+                } else if bin_num_str.chars().collect::<Vec<char>>()[i] == '1' {
+                    combination.push('+');
+                }
+            }
+            to_evaluate.push(combination);
+        }
+        for evaluate_me in &to_evaluate {
+            let res = evaluate_expression(evaluate_me);
+            if res == eq.result {
+                calibration_result += res;
+                break;
+            }
+        }
+        println!("{}/{}", count + 1, eq_amount);
+    }
+    calibration_result
 }
